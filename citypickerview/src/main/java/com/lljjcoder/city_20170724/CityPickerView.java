@@ -7,7 +7,11 @@ import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
+import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -44,10 +48,8 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     
     private WheelView mViewProvince;
     
-    private WheelView mViewCity;
-    
-    private WheelView mViewDistrict;
-    
+    private ListView mViewCity;
+
     private RelativeLayout mRelativeTitleBg;
     
     private TextView mTvOK;
@@ -224,11 +226,10 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         this.titleTextColorStr = builder.titleTextColorStr;
         
         LayoutInflater layoutInflater = LayoutInflater.from(context);
-        popview = layoutInflater.inflate(R.layout.pop_citypicker, null);
+        popview = layoutInflater.inflate(R.layout.layout_citypicker, null);
         
-        mViewProvince = (WheelView) popview.findViewById(R.id.id_province);
-        mViewCity = (WheelView) popview.findViewById(R.id.id_city);
-        mViewDistrict = (WheelView) popview.findViewById(R.id.id_district);
+        mViewProvince =  popview.findViewById(R.id.id_province);
+        mViewCity =  popview.findViewById(R.id.id_city);
         mRelativeTitleBg = (RelativeLayout) popview.findViewById(R.id.rl_title);
         mTvOK = (TextView) popview.findViewById(R.id.tv_confirm);
         mTvTitle = (TextView) popview.findViewById(R.id.tv_title);
@@ -270,24 +271,14 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         if (!TextUtils.isEmpty(this.cancelTextColorStr)) {
             mTvCancel.setTextColor(Color.parseColor(this.cancelTextColorStr));
         }
-        
-        //只显示省市两级联动
-        if (this.showProvinceAndCity) {
-            mViewDistrict.setVisibility(View.GONE);
-        }
-        else {
-            mViewDistrict.setVisibility(View.VISIBLE);
-        }
+
         
         initProvinceDatas(context);
 
         
         // 添加change事件
         mViewProvince.addChangingListener(this);
-        // 添加change事件
-        mViewCity.addChangingListener(this);
-        // 添加change事件
-        mViewDistrict.addChangingListener(this);
+
         // 添加onclick事件
         mTvCancel.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -638,17 +629,12 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         }
         // 设置可见条目数量
         mViewProvince.setVisibleItems(visibleItems);
-        mViewCity.setVisibleItems(visibleItems);
-        mViewDistrict.setVisibleItems(visibleItems);
-        mViewProvince.setCyclic(isProvinceCyclic);
-        mViewCity.setCyclic(isCityCyclic);
-        mViewDistrict.setCyclic(isDistrictCyclic);
+
         arrayWheelAdapter.setPadding(padding);
         arrayWheelAdapter.setTextColor(textColor);
         arrayWheelAdapter.setTextSize(textSize);
         
         updateCities();
-        updateAreas();
     }
     
     /**
@@ -746,7 +732,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         //省份选中的名称
         mProvinceBean = mProvinceBeenArray[pCurrent];
         
-        CityBean[] cities = mPro_CityMap.get(mProvinceBean.getName());
+        final CityBean[] cities = mPro_CityMap.get(mProvinceBean.getName());
         if (cities == null) {
             return;
         }
@@ -761,69 +747,56 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
                 }
             }
         }
-        
-        ArrayWheelAdapter cityWheel = new ArrayWheelAdapter<CityBean>(context, cities);
-        // 设置可见条目数量
-        cityWheel.setTextColor(textColor);
-        cityWheel.setTextSize(textSize);
-        mViewCity.setViewAdapter(cityWheel);
-        if (-1 != cityDefault) {
-            mViewCity.setCurrentItem(cityDefault);
-        }
-        else {
-            mViewCity.setCurrentItem(0);
-        }
-        
-        cityWheel.setPadding(padding);
-        updateAreas();
-    }
-    
-    /**
-     * 根据当前的市，更新区WheelView的信息
-     */
-    private void updateAreas() {
-        
-        int pCurrent = mViewCity.getCurrentItem();
-        
-        mCityBean = mPro_CityMap.get(mProvinceBean.getName())[pCurrent];
-        
-        DistrictBean[] areas = mCity_DisMap.get(mProvinceBean.getName() + mCityBean.getName());
-        
-        if (areas == null) {
-            return;
-        }
-        
-        int districtDefault = -1;
-        if (!TextUtils.isEmpty(defaultDistrict) && areas.length > 0) {
-            for (int i = 0; i < areas.length; i++) {
-                if (defaultDistrict.contains(areas[i].getName())) {
-                    districtDefault = i;
-                    break;
+
+
+        BaseAdapter cityWheel = new BaseAdapter() {
+            @Override
+            public int getCount() {
+                return cities.length;
+            }
+
+            @Override
+            public Object getItem(int i) {
+                return cities[i];
+            }
+
+            @Override
+            public long getItemId(int i) {
+                return i;
+            }
+
+            @Override
+            public View getView(int i, View view, ViewGroup viewGroup) {
+
+                if (view == null)view = new TextView(CityPickerView.this.context);
+
+                ViewHolder viewHolder = (ViewHolder) view.getTag();
+
+                if (viewHolder == null)
+                    viewHolder = new ViewHolder(view);
+
+                viewHolder.tv.setText(cities[i].getName());
+
+
+                return viewHolder.tv;
+            }
+
+
+            class  ViewHolder{
+
+                public TextView tv;
+
+                ViewHolder(View view){
+                    tv = (TextView) view;
+                    view.setTag(this);
                 }
             }
-        }
-        
-        ArrayWheelAdapter districtWheel = new ArrayWheelAdapter<DistrictBean>(context, areas);
-        // 设置可见条目数量
-        districtWheel.setTextColor(textColor);
-        districtWheel.setTextSize(textSize);
-        mViewDistrict.setViewAdapter(districtWheel);
-        
-        if (-1 != districtDefault) {
-            mViewDistrict.setCurrentItem(districtDefault);
-            //获取第一个区名称
-            mDistrictBean = mDisMap.get(mProvinceBean.getName() + mCityBean.getName() + defaultDistrict);
-        }
-        else {
-            mViewDistrict.setCurrentItem(0);
-            if (areas.length > 0) {
-                mDistrictBean = areas[0];
-            }
-        }
-        districtWheel.setPadding(padding);
-        
+        };
+
+
+        mViewCity.setAdapter(cityWheel);
     }
-    
+
     @Override
     public void setType(int type) {
     }
@@ -852,12 +825,6 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     public void onChanged(WheelView wheel, int oldValue, int newValue) {
         if (wheel == mViewProvince) {
             updateCities();
-        }
-        else if (wheel == mViewCity) {
-            updateAreas();
-        }
-        else if (wheel == mViewDistrict) {
-            mDistrictBean = mCity_DisMap.get(mProvinceBean.getName() + mCityBean.getName())[newValue];
         }
     }
 }
