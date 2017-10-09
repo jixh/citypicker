@@ -50,12 +50,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 CityPickerView cityPicker = new CityPickerView.Builder(MainActivity.this).textSize(20)
-                        .titleTextColor("#000000")
+                        .titleTextColor("#3c4350")
                         .backgroundPop(0xa0000000)
                         .province("江苏省")
                         .city("南京市")
                         .district("秦淮区")
-                        .textColor(Color.parseColor("#000000"))
+                        .title("")
+                        .titleBackgroundColor("#ffffff")
+                        .confirTextColor("#3c4350")
+                        .cancelTextColor("#3c4350")
+                        .textColor(Color.parseColor("#3c4350"))
                         .provinceCyclic(true)
                         .cityCyclic(false)
                         .districtCyclic(false)

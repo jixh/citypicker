@@ -50,7 +50,7 @@ public class WheelView extends View {
     /**
      * 滚轮从上到下背景逐渐变淡，到中间，逆反改变
      */
-    private int[] SHADOWS_COLORS = new int[] { 0xefE9E9E9, 0xcfE9E9E9, 0x3fE9E9E9 };
+    private int[] SHADOWS_COLORS = new int[] { 0x38FFFFFF, 0xFFFFFFFF, 0x38FFFFFF };
     
     /**
      * Top and bottom items offset (to hide that)
@@ -652,9 +652,8 @@ public class WheelView extends View {
         
         if (viewAdapter != null && viewAdapter.getItemsCount() > 0) {
             updateView();
-            
             drawItems(canvas);
-            drawCenterRect(canvas);
+//            drawCenterRect(canvas);
         }
         
         if (drawShadows)

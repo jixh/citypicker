@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
@@ -39,7 +38,8 @@ import java.util.Map;
  * 邮箱：lijiwork@sina.com
  */
 public class CityPickerView implements CanShow, OnWheelChangedListener {
-    
+
+    private final LayoutInflater layoutInflater;
     private Context context;
     
     private PopupWindow popwindow;
@@ -225,7 +225,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         this.backgroundPop = builder.backgroundPop;
         this.titleTextColorStr = builder.titleTextColorStr;
         
-        LayoutInflater layoutInflater = LayoutInflater.from(context);
+        layoutInflater = LayoutInflater.from(context);
         popview = layoutInflater.inflate(R.layout.layout_citypicker, null);
         
         mViewProvince =  popview.findViewById(R.id.id_province);
@@ -381,7 +381,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         /**
          * 标题
          */
-        private String mTitle = "选择地区";
+        private String mTitle = "";
         
         /**
          * 两级联动
@@ -767,25 +767,17 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
 
             @Override
             public View getView(int i, View view, ViewGroup viewGroup) {
-
-                if (view == null)view = new TextView(CityPickerView.this.context);
-
+                if (view == null)view = layoutInflater.inflate(R.layout.item_city,null);
                 ViewHolder viewHolder = (ViewHolder) view.getTag();
-
                 if (viewHolder == null)
                     viewHolder = new ViewHolder(view);
-
                 viewHolder.tv.setText(cities[i].getName());
-
-
                 return viewHolder.tv;
             }
 
 
             class  ViewHolder{
-
                 public TextView tv;
-
                 ViewHolder(View view){
                     tv = (TextView) view;
                     view.setTag(this);
