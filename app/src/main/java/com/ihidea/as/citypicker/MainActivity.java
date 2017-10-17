@@ -11,7 +11,6 @@ import android.widget.TextView;
 
 import com.lljjcoder.city_20170724.CityPickerView;
 import com.lljjcoder.city_20170724.bean.CityBean;
-import com.lljjcoder.city_20170724.bean.DistrictBean;
 import com.lljjcoder.city_20170724.bean.ProvinceBean;
 
 public class MainActivity extends AppCompatActivity {

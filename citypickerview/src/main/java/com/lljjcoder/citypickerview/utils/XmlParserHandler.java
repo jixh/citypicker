@@ -1,8 +1,7 @@
 package com.lljjcoder.citypickerview.utils;
 
-
-import com.lljjcoder.citypickerview.model.CityModel;
-import com.lljjcoder.citypickerview.model.ProvinceModel;
+import com.lljjcoder.city_20170724.bean.CityBean;
+import com.lljjcoder.city_20170724.bean.ProvinceBean;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -15,32 +14,32 @@ public class XmlParserHandler extends DefaultHandler {
 	/**
 	 * 存储所有的解析对象
 	 */
-	private List<ProvinceModel> provinceList = new ArrayList<ProvinceModel>();
+	private List<ProvinceBean> provinceList = new ArrayList();
 
 	public XmlParserHandler() { }
 
-	public List<ProvinceModel> getDataList() {
+	public List<ProvinceBean> getDataList() {
 		return provinceList;
 	}
 
 	@Override
 	public void startDocument() throws SAXException { }
 
-	private ProvinceModel provinceModel;
-	private CityModel cityModel;
+	private ProvinceBean provinceBean;
+	private CityBean cityBean;
 	int type = -1;
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
 							 Attributes attributes) throws SAXException {
 		if (qName.equals("key")){
-			provinceModel = new ProvinceModel();
+			provinceBean = new ProvinceBean();
 			type = 0;
 		}else if (qName.equals("array")){
 			type = 1;
 		}else if (qName.equals("string")){
 			type = 2;
-			cityModel = new CityModel();
+			cityBean = new CityBean();
 		}
 	}
 
@@ -51,9 +50,9 @@ public class XmlParserHandler extends DefaultHandler {
 		if (qName.equals("array")) {
 			type = -1;
 		} else if (qName.equals("string")) {
-			provinceModel.getCityList().add(cityModel);
+			provinceBean.getCityList().add(cityBean);
 		} else if (qName.equals("key")) {
-			provinceList.add(provinceModel);
+			provinceList.add(provinceBean);
 		}
 	}
 
@@ -63,12 +62,12 @@ public class XmlParserHandler extends DefaultHandler {
 		super.characters(ch, start, length);
 		if (length==0)return;
 		String content = new String(ch, start, length);
-		if (type == 0 && provinceModel!=null){
-			provinceModel.setName(content);
+		if (type == 0 && provinceBean !=null){
+			provinceBean.setName(content);
 			type = -1;
 		}
-		else if (type == 2 && cityModel!=null) {
-			cityModel.setName(content);
+		else if (type == 2 && cityBean !=null) {
+			cityBean.setName(content);
 			type = -1;
 		}
 	}

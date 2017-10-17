@@ -12,23 +12,19 @@ import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
-
 import com.lljjcoder.city_20170724.bean.CityBean;
 import com.lljjcoder.city_20170724.bean.ProvinceBean;
 import com.lljjcoder.citypickerview.R;
-import com.lljjcoder.citypickerview.model.ProvinceModel;
 import com.lljjcoder.citypickerview.utils.XmlParserHandler;
 import com.lljjcoder.citypickerview.widget.CanShow;
 import com.lljjcoder.citypickerview.widget.wheel.OnWheelChangedListener;
 import com.lljjcoder.citypickerview.widget.wheel.WheelView;
 import com.lljjcoder.citypickerview.widget.wheel.adapters.ArrayWheelAdapter;
-
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
@@ -59,18 +55,18 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     //***************************20170724更新************************************//
     
     //省份数据
-    ArrayList<ProvinceBean> mProvinceBeanArrayList = new ArrayList<>();
+    List<ProvinceBean> mProvinceBeanArrayList = new ArrayList<>();
     
     //城市数据
-    ArrayList<ArrayList<CityBean>> mCityBeanArrayList;
+    List<ArrayList<CityBean>> mCityBeanArrayList;
     
     //***************************20170724更新************************************//
     
     //***************************20170822更新************************************//
     
-    private ProvinceBean[] mProvinceBeenArray;
+    private com.lljjcoder.city_20170724.bean.ProvinceBean[] mProvinceBeenArray;
     
-    private ProvinceBean mProvinceBean;
+    private com.lljjcoder.city_20170724.bean.ProvinceBean mProvinceBean;
     
     private CityBean mCityBean;
 
@@ -85,7 +81,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     private OnCityItemClickListener listener;
     
     public interface OnCityItemClickListener {
-        void onSelected(ProvinceBean province, CityBean city);
+        void onSelected(com.lljjcoder.city_20170724.bean.ProvinceBean province, CityBean city);
         
         void onCancel();
     }
@@ -582,7 +578,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
                 }
             }
         }
-        ArrayWheelAdapter arrayWheelAdapter = new ArrayWheelAdapter<ProvinceBean>(context, mProvinceBeenArray);
+        ArrayWheelAdapter arrayWheelAdapter = new ArrayWheelAdapter<com.lljjcoder.city_20170724.bean.ProvinceBean>(context, mProvinceBeenArray);
         arrayWheelAdapter.setPadding(padding);
         arrayWheelAdapter.setTextColor(textColor);
         arrayWheelAdapter.setTextSize(textSize);
@@ -605,7 +601,6 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     
     protected void initProvinceDatas(Context context) {
 
-        List<ProvinceModel> provinceList = null;
         AssetManager asset = context.getAssets();
         try {
             InputStream input = asset.open("province_data.xml");
@@ -617,12 +612,8 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
             parser.parse(input, handler);
             input.close();
             // 获取解析出来的数据
-            provinceList = handler.getDataList();
+            mProvinceBeanArrayList = handler.getDataList();
 
-            mProvinceBeanArrayList = new ArrayList<>();
-            for (ProvinceModel pm:provinceList) {
-                mProvinceBeanArrayList.add(pm.toProvinceBean());
-            }
             mCityBeanArrayList = new ArrayList<>(mProvinceBeanArrayList.size());
 
             //*/ 初始化默认选中的省、市、区，默认选中第一个省份的第一个市区中的第一个区县
@@ -635,12 +626,12 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
             }
 
             //省份数据
-            mProvinceBeenArray = new ProvinceBean[mProvinceBeanArrayList.size()];
+            mProvinceBeenArray = new com.lljjcoder.city_20170724.bean.ProvinceBean[mProvinceBeanArrayList.size()];
 
             for (int p = 0; p < mProvinceBeanArrayList.size(); p++) {
 
                 //遍历每个省份
-                ProvinceBean itemProvince = mProvinceBeanArrayList.get(p);
+                com.lljjcoder.city_20170724.bean.ProvinceBean itemProvince = mProvinceBeanArrayList.get(p);
 
                 //每个省份对应下面的市
                 ArrayList<CityBean> cityList = itemProvince.getCityList();
