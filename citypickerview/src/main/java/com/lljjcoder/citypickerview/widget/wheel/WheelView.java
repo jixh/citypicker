@@ -50,7 +50,7 @@ public class WheelView extends View {
     /**
      * 滚轮从上到下背景逐渐变淡，到中间，逆反改变
      */
-    private int[] SHADOWS_COLORS = new int[] { 0x38FFFFFF, 0xFFFFFFFF, 0x38FFFFFF };
+    private int[] SHADOWS_COLORS = new int[] { 0xFFFFFFFF, 0x99FFFFFF, 0x38FFFFFF };
     
     /**
      * Top and bottom items offset (to hide that)
@@ -671,13 +671,12 @@ public class WheelView extends View {
         //*/
         
         //从中间到顶部渐变处理
-        int count = getVisibleItems() == 2 ? 1 : getVisibleItems() / 2;
-        int height = (int) (count * getItemHeight());
+        int height = getItemHeight()*2/3;
         
-        topShadow.setBounds(0, 0, getWidth(), height);
+        topShadow.setBounds(0, 0, getWidth(), getHeight()/2 - height);
         topShadow.draw(canvas);
         
-        bottomShadow.setBounds(0, getHeight() - height, getWidth(), getHeight());
+        bottomShadow.setBounds(0, getHeight()/2 + height, getWidth(), getHeight());
         bottomShadow.draw(canvas);
         
         Log.d("liji.wheel", "getItemHeight(): " + getItemHeight());

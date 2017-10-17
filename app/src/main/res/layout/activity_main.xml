@@ -12,22 +12,6 @@
     tools:context="com.ihidea.as.citypicker.MainActivity">
 
     <Button
-        android:id="@+id/goList"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="列表选择器 ----> 选择省市区"/>
-
-    <TextView
-        android:id="@+id/tv_resultList"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/go"
-        android:layout_marginTop="10dp"
-        android:text="选择结果："
-        android:textSize="20sp"/>
-
-
-    <Button
         android:layout_marginTop="40dp"
         android:id="@+id/goWheel"
         android:layout_width="match_parent"
@@ -42,9 +26,4 @@
         android:layout_marginTop="10dp"
         android:text="选择结果："
         android:textSize="20sp"/>
-
-
-
-
-
 </LinearLayout>

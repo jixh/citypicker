@@ -1,41 +1,39 @@
 package com.lljjcoder.city_20170724;
 
 import android.content.Context;
+import android.content.res.AssetManager;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.text.TextUtils;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.lljjcoder.city_20170724.bean.CityBean;
-import com.lljjcoder.city_20170724.bean.DistrictBean;
 import com.lljjcoder.city_20170724.bean.ProvinceBean;
 import com.lljjcoder.citypickerview.R;
+import com.lljjcoder.citypickerview.model.ProvinceModel;
+import com.lljjcoder.citypickerview.utils.XmlParserHandler;
 import com.lljjcoder.citypickerview.widget.CanShow;
 import com.lljjcoder.citypickerview.widget.wheel.OnWheelChangedListener;
 import com.lljjcoder.citypickerview.widget.wheel.WheelView;
 import com.lljjcoder.citypickerview.widget.wheel.adapters.ArrayWheelAdapter;
 
-import java.lang.reflect.Type;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.parsers.SAXParser;
+import javax.xml.parsers.SAXParserFactory;
+
 /**
  * 省市区三级选择
- * 作者：liji on 2015/12/17 10:40
- * 邮箱：lijiwork@sina.com
  */
 public class CityPickerView implements CanShow, OnWheelChangedListener {
 
@@ -48,7 +46,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     
     private WheelView mViewProvince;
     
-    private ListView mViewCity;
+    private WheelView mViewCity;
 
     private RelativeLayout mRelativeTitleBg;
     
@@ -66,9 +64,6 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     //城市数据
     ArrayList<ArrayList<CityBean>> mCityBeanArrayList;
     
-    //地区数据
-    ArrayList<ArrayList<ArrayList<DistrictBean>>> mDistrictBeanArrayList;
-    
     //***************************20170724更新************************************//
     
     //***************************20170822更新************************************//
@@ -78,30 +73,19 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     private ProvinceBean mProvinceBean;
     
     private CityBean mCityBean;
-    
-    private DistrictBean mDistrictBean;
-    
+
     /**
      * key - 省 value - 市
      */
     protected Map<String, CityBean[]> mPro_CityMap = new HashMap<String, CityBean[]>();
     
-    /**
-     * key - 市 values - 区
-     */
-    protected Map<String, DistrictBean[]> mCity_DisMap = new HashMap<String, DistrictBean[]>();
-    
-    /**
-     * key - 区 values - 邮编
-     */
-    protected Map<String, DistrictBean> mDisMap = new HashMap<String, DistrictBean>();
-    
+
     //***************************20170822更新************************************//
     
     private OnCityItemClickListener listener;
     
     public interface OnCityItemClickListener {
-        void onSelected(ProvinceBean province, CityBean city, DistrictBean district);
+        void onSelected(ProvinceBean province, CityBean city);
         
         void onCancel();
     }
@@ -142,11 +126,6 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
      * 市滚轮是否循环滚动
      */
     private boolean isCityCyclic = true;
-    
-    /**
-     * 区滚轮是否循环滚动
-     */
-    private boolean isDistrictCyclic = true;
     
     /**
      * item间距
@@ -208,7 +187,6 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         this.textSize = builder.textSize;
         this.visibleItems = builder.visibleItems;
         this.isProvinceCyclic = builder.isProvinceCyclic;
-        this.isDistrictCyclic = builder.isDistrictCyclic;
         this.isCityCyclic = builder.isCityCyclic;
         this.context = builder.mContext;
         this.padding = builder.padding;
@@ -271,13 +249,11 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         if (!TextUtils.isEmpty(this.cancelTextColorStr)) {
             mTvCancel.setTextColor(Color.parseColor(this.cancelTextColorStr));
         }
-
-        
         initProvinceDatas(context);
-
-        
         // 添加change事件
         mViewProvince.addChangingListener(this);
+        mViewCity.addChangingListener(this);
+        mViewCity.setDrawShadows(false);
 
         // 添加onclick事件
         mTvCancel.setOnClickListener(new View.OnClickListener() {
@@ -290,7 +266,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         mTvOK.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                listener.onSelected(mProvinceBean, mCityBean, mDistrictBean);
+                listener.onSelected(mProvinceBean, mCityBean);
                 hide();
             }
         });
@@ -330,12 +306,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
          * 市滚轮是否循环滚动
          */
         private boolean isCityCyclic = true;
-        
-        /**
-         * 区滚轮是否循环滚动
-         */
-        private boolean isDistrictCyclic = true;
-        
+
         private Context mContext;
         
         /**
@@ -581,17 +552,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
             this.isCityCyclic = isCityCyclic;
             return this;
         }
-        
-        /**
-         * 区滚轮是否循环滚动
-         *
-         * @param isDistrictCyclic
-         * @return
-         */
-        public Builder districtCyclic(boolean isDistrictCyclic) {
-            this.isDistrictCyclic = isDistrictCyclic;
-            return this;
-        }
+
         
         /**
          * item间距
@@ -622,6 +583,10 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
             }
         }
         ArrayWheelAdapter arrayWheelAdapter = new ArrayWheelAdapter<ProvinceBean>(context, mProvinceBeenArray);
+        arrayWheelAdapter.setPadding(padding);
+        arrayWheelAdapter.setTextColor(textColor);
+        arrayWheelAdapter.setTextSize(textSize);
+
         mViewProvince.setViewAdapter(arrayWheelAdapter);
         //获取所设置的省的位置，直接定位到该位置
         if (-1 != provinceDefault) {
@@ -630,9 +595,6 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         // 设置可见条目数量
         mViewProvince.setVisibleItems(visibleItems);
 
-        arrayWheelAdapter.setPadding(padding);
-        arrayWheelAdapter.setTextColor(textColor);
-        arrayWheelAdapter.setTextSize(textSize);
         
         updateCities();
     }
@@ -642,84 +604,68 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
      */
     
     protected void initProvinceDatas(Context context) {
-        
-        String cityJson = utils.getJson(context, "city_20170724.json");
-        Type type = new TypeToken<ArrayList<ProvinceBean>>() {
-        }.getType();
-        
-        mProvinceBeanArrayList = new Gson().fromJson(cityJson, type);
-        mCityBeanArrayList = new ArrayList<>(mProvinceBeanArrayList.size());
-        mDistrictBeanArrayList = new ArrayList<>(mProvinceBeanArrayList.size());
-        
-        //*/ 初始化默认选中的省、市、区，默认选中第一个省份的第一个市区中的第一个区县
-        if (mProvinceBeanArrayList != null && !mProvinceBeanArrayList.isEmpty()) {
-            mProvinceBean = mProvinceBeanArrayList.get(0);
-            List<CityBean> cityList = mProvinceBean.getCityList();
-            if (cityList != null && !cityList.isEmpty() && cityList.size() > 0) {
-                mCityBean = cityList.get(0);
-                List<DistrictBean> districtList = mCityBean.getCityList();
-                if (districtList != null && !districtList.isEmpty() && districtList.size() > 0) {
-                    mDistrictBean = districtList.get(0);
+
+        List<ProvinceModel> provinceList = null;
+        AssetManager asset = context.getAssets();
+        try {
+            InputStream input = asset.open("province_data.xml");
+            // 创建一个解析xml的工厂对象
+            SAXParserFactory spf = SAXParserFactory.newInstance();
+            // 解析xml
+            SAXParser parser = spf.newSAXParser();
+            XmlParserHandler handler = new XmlParserHandler();
+            parser.parse(input, handler);
+            input.close();
+            // 获取解析出来的数据
+            provinceList = handler.getDataList();
+
+            mProvinceBeanArrayList = new ArrayList<>();
+            for (ProvinceModel pm:provinceList) {
+                mProvinceBeanArrayList.add(pm.toProvinceBean());
+            }
+            mCityBeanArrayList = new ArrayList<>(mProvinceBeanArrayList.size());
+
+            //*/ 初始化默认选中的省、市、区，默认选中第一个省份的第一个市区中的第一个区县
+            if (mProvinceBeanArrayList != null && !mProvinceBeanArrayList.isEmpty()) {
+                mProvinceBean = mProvinceBeanArrayList.get(0);
+                List<CityBean> cityList = mProvinceBean.getCityList();
+                if (cityList != null && !cityList.isEmpty() && cityList.size() > 0) {
+                    mCityBean = cityList.get(0);
                 }
             }
-        }
-        
-        //省份数据
-        mProvinceBeenArray = new ProvinceBean[mProvinceBeanArrayList.size()];
-        
-        for (int p = 0; p < mProvinceBeanArrayList.size(); p++) {
-            
-            //遍历每个省份
-            ProvinceBean itemProvince = mProvinceBeanArrayList.get(p);
-            
-            //每个省份对应下面的市
-            ArrayList<CityBean> cityList = itemProvince.getCityList();
-            
-            //当前省份下面的所有城市
-            CityBean[] cityNames = new CityBean[cityList.size()];
-            
-            //遍历当前省份下面城市的所有数据
-            for (int j = 0; j < cityList.size(); j++) {
-                cityNames[j] = cityList.get(j);
-                
-                //当前省份下面每个城市下面再次对应的区或者县
-                List<DistrictBean> districtList = cityList.get(j).getCityList();
-                
-                DistrictBean[] distrinctArray = new DistrictBean[districtList.size()];
-                
-                for (int k = 0; k < districtList.size(); k++) {
-                    
-                    // 遍历市下面所有区/县的数据
-                    DistrictBean districtModel = districtList.get(k);
-                    
-                    //存放 省市区-区 数据
-                    mDisMap.put(itemProvince.getName() + cityNames[j].getName() + districtList.get(k).getName(),
-                            districtModel);
-                    
-                    distrinctArray[k] = districtModel;
-                    
+
+            //省份数据
+            mProvinceBeenArray = new ProvinceBean[mProvinceBeanArrayList.size()];
+
+            for (int p = 0; p < mProvinceBeanArrayList.size(); p++) {
+
+                //遍历每个省份
+                ProvinceBean itemProvince = mProvinceBeanArrayList.get(p);
+
+                //每个省份对应下面的市
+                ArrayList<CityBean> cityList = itemProvince.getCityList();
+
+                //当前省份下面的所有城市
+                CityBean[] cityNames = new CityBean[cityList.size()];
+
+                //遍历当前省份下面城市的所有数据
+                for (int j = 0; j < cityList.size(); j++) {
+                    cityNames[j] = cityList.get(j);
                 }
-                // 市-区/县的数据，保存到mDistrictDatasMap
-                mCity_DisMap.put(itemProvince.getName() + cityNames[j].getName(), distrinctArray);
-                
+
+                // 省-市的数据，保存到mCitisDatasMap
+                mPro_CityMap.put(itemProvince.getName(), cityNames);
+
+                mCityBeanArrayList.add(cityList);
+
+                //赋值所有省份的名称
+                mProvinceBeenArray[p] = itemProvince;
+
             }
-            
-            // 省-市的数据，保存到mCitisDatasMap
-            mPro_CityMap.put(itemProvince.getName(), cityNames);
-            
-            mCityBeanArrayList.add(cityList);
-            
-            ArrayList<ArrayList<DistrictBean>> array2DistrictLists = new ArrayList<>(cityList.size());
-            
-            for (int c = 0; c < cityList.size(); c++) {
-                CityBean cityBean = cityList.get(c);
-                array2DistrictLists.add(cityBean.getCityList());
-            }
-            mDistrictBeanArrayList.add(array2DistrictLists);
-            
-            //赋值所有省份的名称
-            mProvinceBeenArray[p] = itemProvince;
-            
+        } catch (Throwable e) {
+            e.printStackTrace();
+        } finally {
+
         }
     }
     
@@ -736,7 +682,6 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         if (cities == null) {
             return;
         }
-        
         //设置最初的默认城市
         int cityDefault = -1;
         if (!TextUtils.isEmpty(defaultCityName) && cities.length > 0) {
@@ -748,45 +693,24 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
             }
         }
 
+        ArrayWheelAdapter cityWheel = new ArrayWheelAdapter(context, cities);
+        // 设置可见条目数量
+        cityWheel.setTextColor(textColor);
+        cityWheel.setTextSize(textSize);
+        cityWheel.setPadding(padding);
 
-        BaseAdapter cityWheel = new BaseAdapter() {
-            @Override
-            public int getCount() {
-                return cities.length;
-            }
+        mViewCity.setViewAdapter(cityWheel);
+        mViewCity.setVisibleItems(visibleItems);
+        mViewCity.setCyclic(isCityCyclic);
 
-            @Override
-            public Object getItem(int i) {
-                return cities[i];
-            }
-
-            @Override
-            public long getItemId(int i) {
-                return i;
-            }
-
-            @Override
-            public View getView(int i, View view, ViewGroup viewGroup) {
-                if (view == null)view = layoutInflater.inflate(R.layout.item_city,null);
-                ViewHolder viewHolder = (ViewHolder) view.getTag();
-                if (viewHolder == null)
-                    viewHolder = new ViewHolder(view);
-                viewHolder.tv.setText(cities[i].getName());
-                return viewHolder.tv;
-            }
-
-
-            class  ViewHolder{
-                public TextView tv;
-                ViewHolder(View view){
-                    tv = (TextView) view;
-                    view.setTag(this);
-                }
-            }
-        };
-
-
-        mViewCity.setAdapter(cityWheel);
+        if (-1 != cityDefault) {
+            mViewCity.setCurrentItem(cityDefault);
+            mCityBean = cities[cityDefault];
+        }
+        else {
+            mViewCity.setCurrentItem(0);
+            mCityBean = cities[0];
+        }
     }
 
     @Override
@@ -817,6 +741,12 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
     public void onChanged(WheelView wheel, int oldValue, int newValue) {
         if (wheel == mViewProvince) {
             updateCities();
+        }else if (wheel == mViewCity){
+            //省份滚轮滑动的当前位置
+            int pCurrent = mViewCity.getCurrentItem();
+            final CityBean[] cities = mPro_CityMap.get(mProvinceBean.getName());
+            //省份选中的名称
+            mCityBean = cities[pCurrent];
         }
     }
 }
