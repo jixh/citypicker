@@ -28,7 +28,8 @@ public class MainActivity extends AppCompatActivity {
         goWheel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                CityPickerView cityPicker = new CityPickerView.Builder(MainActivity.this).textSize(20)
+                CityPickerView cityPicker = new CityPickerView.Builder(MainActivity.this)
+                        .textSize(17)
                         .titleTextColor("#3c4350")
                         .backgroundPop(0xa0000000)
                         .province("浙江")

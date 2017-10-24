@@ -678,12 +678,6 @@ public class WheelView extends View {
         
         bottomShadow.setBounds(0, getHeight()/2 + height, getWidth(), getHeight());
         bottomShadow.draw(canvas);
-        
-        Log.d("liji.wheel", "getItemHeight(): " + getItemHeight());
-        Log.d("liji.wheel", "height: " + height);
-        Log.d("liji.wheel", "getWidth: " + getWidth());
-        Log.d("liji.wheel", "getHeight():" + getHeight());
-        Log.d("liji.wheel", "visibleItems:" + visibleItems);
     }
     
     /**
@@ -696,7 +690,6 @@ public class WheelView extends View {
         
         int top = (currentItem - firstItem) * getItemHeight() + (getItemHeight() - getHeight()) / 2;
         canvas.translate(PADDING, -top + scrollingOffset);
-        
         itemsLayout.draw(canvas);
         
         canvas.restore();

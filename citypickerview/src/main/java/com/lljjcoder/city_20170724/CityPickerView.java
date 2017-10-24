@@ -578,7 +578,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
                 }
             }
         }
-        ArrayWheelAdapter arrayWheelAdapter = new ArrayWheelAdapter<com.lljjcoder.city_20170724.bean.ProvinceBean>(context, mProvinceBeenArray);
+        ArrayWheelAdapter arrayWheelAdapter = new ArrayWheelAdapter<>(context, mProvinceBeenArray);
         arrayWheelAdapter.setPadding(padding);
         arrayWheelAdapter.setTextColor(textColor);
         arrayWheelAdapter.setTextSize(textSize);
@@ -687,7 +687,7 @@ public class CityPickerView implements CanShow, OnWheelChangedListener {
         ArrayWheelAdapter cityWheel = new ArrayWheelAdapter(context, cities);
         // 设置可见条目数量
         cityWheel.setTextColor(textColor);
-        cityWheel.setTextSize(textSize);
+        cityWheel.setTextSize(textSize - 3);
         cityWheel.setPadding(padding);
 
         mViewCity.setViewAdapter(cityWheel);
