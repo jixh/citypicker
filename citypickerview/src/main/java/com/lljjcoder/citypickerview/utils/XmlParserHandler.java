@@ -1,59 +1,45 @@
 package com.lljjcoder.citypickerview.utils;
 
-
-import com.lljjcoder.citypickerview.model.CityModel;
-import com.lljjcoder.citypickerview.model.DistrictModel;
-import com.lljjcoder.citypickerview.model.ProvinceModel;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.lljjcoder.city_20170724.bean.CityBean;
+import com.lljjcoder.city_20170724.bean.ProvinceBean;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
-
+import java.util.ArrayList;
+import java.util.List;
 
 public class XmlParserHandler extends DefaultHandler {
-
 	/**
 	 * 存储所有的解析对象
 	 */
-	private List<ProvinceModel> provinceList = new ArrayList<ProvinceModel>();
+	private List<ProvinceBean> provinceList = new ArrayList();
 
-	public XmlParserHandler() {
+	public XmlParserHandler() { }
 
-	}
-
-	public List<ProvinceModel> getDataList() {
+	public List<ProvinceBean> getDataList() {
 		return provinceList;
 	}
 
 	@Override
-	public void startDocument() throws SAXException {
-		// 当读到第一个开始标签的时候，会触发这个方法
-	}
+	public void startDocument() throws SAXException { }
 
-	ProvinceModel provinceModel = new ProvinceModel();
-	CityModel cityModel = new CityModel();
-	DistrictModel districtModel = new DistrictModel();
+	private ProvinceBean provinceBean;
+	private CityBean cityBean;
+	int type = -1;
 
 	@Override
 	public void startElement(String uri, String localName, String qName,
 							 Attributes attributes) throws SAXException {
-		// 当遇到开始标记的时候，调用这个方法
-		if (qName.equals("province")) {
-			provinceModel = new ProvinceModel();
-			provinceModel.setName(attributes.getValue(0));
-			provinceModel.setCityList(new ArrayList<CityModel>());
-		} else if (qName.equals("city")) {
-			cityModel = new CityModel();
-			cityModel.setName(attributes.getValue(0));
-			cityModel.setDistrictList(new ArrayList<DistrictModel>());
-		} else if (qName.equals("district")) {
-			districtModel = new DistrictModel();
-			districtModel.setName(attributes.getValue(0));
-			districtModel.setZipcode(attributes.getValue(1));
+		if (qName.equals("key")){
+			provinceBean = new ProvinceBean();
+			type = 0;
+		}else if (qName.equals("array")){
+			type = 1;
+		}else if (qName.equals("string")){
+			type = 2;
+			cityBean = new CityBean();
 		}
 	}
 
@@ -61,18 +47,29 @@ public class XmlParserHandler extends DefaultHandler {
 	public void endElement(String uri, String localName, String qName)
 			throws SAXException {
 		// 遇到结束标记的时候，会调用这个方法
-		if (qName.equals("district")) {
-			cityModel.getDistrictList().add(districtModel);
-		} else if (qName.equals("city")) {
-			provinceModel.getCityList().add(cityModel);
-		} else if (qName.equals("province")) {
-			provinceList.add(provinceModel);
+		if (qName.equals("array")) {
+			type = -1;
+		} else if (qName.equals("string")) {
+			provinceBean.getCityList().add(cityBean);
+		} else if (qName.equals("key")) {
+			provinceList.add(provinceBean);
 		}
 	}
 
 	@Override
 	public void characters(char[] ch, int start, int length)
 			throws SAXException {
+		super.characters(ch, start, length);
+		if (length==0)return;
+		String content = new String(ch, start, length);
+		if (type == 0 && provinceBean !=null){
+			provinceBean.setName(content);
+			type = -1;
+		}
+		else if (type == 2 && cityBean !=null) {
+			cityBean.setName(content);
+			type = -1;
+		}
 	}
 
 }
